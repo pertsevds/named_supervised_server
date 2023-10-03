@@ -1,8 +1,8 @@
 defmodule NamedSupervisedServer do
   @moduledoc """
-  A behaviour module for starting supervised GenServer processes.
+  A behaviour module for starting supervised GenServer that is named as `__MODULE__` by default or you can supply different name.
 
-  With the use of `NamedSupervisedServer`, you can avoid the need to add `c:start_link/1` function
+  With the use of `NamedSupervisedServer`, you can avoid the need to add `c:start_link/1` function with `name: __MODULE__`
   to your module every time you write a new one.
   And if you need your own `c:start_link/1` function, you can override it.
 
@@ -17,7 +17,7 @@ defmodule NamedSupervisedServer do
   > * set `@behaviour NamedSupervisedServer`,
   > * add `use GenServer`,
   > * pass options passed to `use NamedSupervisedServer` to `use GenServer`,
-  > * define a `c:start_link/1` function, so your module does not need to define it
+  > * define a `c:start_link/1` function with `name: __MODULE__`, so your module does not need to define it
   > if you don't want a custom one.
 
   ## Callbacks
@@ -59,7 +59,9 @@ defmodule NamedSupervisedServer do
   ...>  end
   ...>end
   ...># Starting a supervised process
-  ...>{:ok, _} = Supervisor.start_link([MyServer], strategy: :one_for_one)
+  ...>{:ok, sup} = Supervisor.start_link([MyServer], strategy: :one_for_one)
+  ...>{_id, child, _type, _modules} = hd(Supervisor.which_children(sup))
+  ...>assert Process.whereis(MyServer) == child
   ```
 
   ### Additional options
@@ -77,9 +79,11 @@ defmodule NamedSupervisedServer do
   ...>{:ok, chldspec} = :supervisor.get_childspec(sup, TransientServer)
   ...>assert chldspec.restart == :transient
   ...>assert chldspec.shutdown == 10_000
+  ...>{_id, child, _type, _modules} = hd(Supervisor.which_children(sup))
+  ...>assert Process.whereis(TransientServer) == child
   ```
 
-  ### Naming the process
+  ### Naming the process with different name
   ```elixir
   iex>defmodule NamedServer do
   ...>  use NamedSupervisedServer
@@ -127,9 +131,9 @@ defmodule NamedSupervisedServer do
   ...>end
   ...>
   ...># Starting a custom supervised GenServer process
-  ...>{:ok, _} = Supervisor.start_link([CustomServer], strategy: :one_for_one)
-  ...>pid = Process.whereis(:custom_server)
-  ...>true = is_pid(pid)
+  ...>{:ok, sup} = Supervisor.start_link([CustomServer], strategy: :one_for_one)
+  ...>{_id, child, _type, _modules} = hd(Supervisor.which_children(sup))
+  ...>assert Process.whereis(:custom_server) == child
   ```
 
   ## References
@@ -139,7 +143,7 @@ defmodule NamedSupervisedServer do
   """
 
   @doc """
-  Starts a `NamedSupervisedServer` process linked to the current process.
+  Starts a `NamedSupervisedServer` process linked to the current process that is named as `__MODULE__` by default or you can supply different name.
 
   This is often used to start the `NamedSupervisedServer` as part of a supervision tree.
 
