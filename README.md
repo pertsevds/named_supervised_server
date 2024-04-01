@@ -2,7 +2,7 @@
 
 The NamedSupervisedServer module simplifies the start-up of supervised GenServers with specific names and customizable initialization processes.
 
-NamedSupervisedServer is a GenServer behavior that can be started using start_link/1. By default, it is named as \_\_MODULE\_\_, but you can also supply a different name.
+NamedSupervisedServer is a GenServer + start_link/1 behavior. By default, it registers name \_\_MODULE\_\_, but you can also supply a different name.
 
 ## Installation
 
