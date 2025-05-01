@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2023 Dmitriy Pertsev
+
 defmodule NamedSupervisedServer do
   @moduledoc """
   A behaviour module for starting supervised GenServer that is named as `__MODULE__` by default or you can supply different name.
