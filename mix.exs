@@ -7,10 +7,11 @@ defmodule NamedSupervisedServer.MixProject do
   def project do
     [
       app: :named_supervised_server,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.15",
       description: description(),
       package: package(),
+      docs: docs(),
       deps: deps()
     ]
   end
@@ -40,6 +41,15 @@ defmodule NamedSupervisedServer.MixProject do
       {:styler, "~> 1.4", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.30", only: :dev, runtime: false}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: [
+        "README.md"
+      ]
     ]
   end
 end
