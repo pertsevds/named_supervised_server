@@ -29,7 +29,8 @@ defmodule NamedSupervisedServer.MixProject do
   defp package do
     [
       licenses: ["Apache-2.0"],
-      links: %{"GitHub" => "https://github.com/pertsevds/named_supervised_server"}
+      links: %{"GitHub" => "https://github.com/pertsevds/named_supervised_server"},
+      files: ["lib", "mix.exs", "README.md", "LICENSE", "NOTICE"]
     ]
   end
 

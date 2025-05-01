@@ -20,7 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-supervised_server-*.tar
+named_supervised_server-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
