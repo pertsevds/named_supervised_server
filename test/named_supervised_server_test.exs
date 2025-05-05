@@ -146,4 +146,40 @@ defmodule NamedSupervisedServerTest do
       assert_child_spec(pid, TestGenServer, :transient, 10_000, {:ok, []}, name)
     end
   end
+
+  describe "With PartitionSupervisor" do
+    test "and unnamed TestGenServer" do
+      children = [
+        {PartitionSupervisor,
+         child_spec: {TestGenServer, custom: "value"},
+         name: TestGenServerPartitionSupervisor,
+         with_arguments: fn [opts], partition ->
+           [Keyword.put(opts, :partition, partition)]
+         end}
+      ]
+
+      # Starting a named supervised process
+      {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
+
+      # Access the named process using its registered name
+      {:ok, [custom: "value"]} = TestGenServer.get_state(TestGenServer0)
+    end
+
+    test "and named TestGenServer" do
+      children = [
+        {PartitionSupervisor,
+         child_spec: {TestGenServer, custom: "value", name: :my_named_server},
+         name: TestGenServerPartitionSupervisor,
+         with_arguments: fn [opts], partition ->
+           [Keyword.put(opts, :partition, partition)]
+         end}
+      ]
+
+      # Starting a named supervised process
+      {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
+
+      # Access the named process using its registered name
+      {:ok, [custom: "value"]} = TestGenServer.get_state(:my_named_server0)
+    end
+  end
 end
