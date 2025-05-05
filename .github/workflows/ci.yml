@@ -19,7 +19,7 @@ jobs:
         include:
           - os: ubuntu-latest
             elixir-version: 1.18
-            otp-version: 26
+            otp-version: 27
     env:
       MIX_ENV: test
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
