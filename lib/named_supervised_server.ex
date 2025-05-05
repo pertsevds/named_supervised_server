@@ -9,10 +9,12 @@ defmodule NamedSupervisedServer do
   to your module every time you write a new one.
   And if you need your own `c:start_link/1` function, you can override it.
 
+  Compatible with `PartitionSupervisor`.
+
   ## Usage
 
   * Add `use NamedSupervisedServer` to your module.
-  * View [`Examples`](#module-examples).
+  * See [`Examples`](#module-examples).
 
   > #### `use NamedSupervisedServer` {: .info}
   >
@@ -22,6 +24,33 @@ defmodule NamedSupervisedServer do
   > * pass options passed to `use NamedSupervisedServer` to `use GenServer`,
   > * define a `c:start_link/1` function with `name: __MODULE__`, so your module does not need to define it
   > if you don't want a custom one.
+
+  ## Usage with PartitionSupervisor
+
+  You must use `with_arguments` with `:partition` key:
+
+  ```elixir
+  with_arguments: fn [opts], partition ->
+    [Keyword.put(opts, :partition, partition)]
+  end}
+  ```
+
+  Like this:
+
+  ```elixir
+  children = [
+    {PartitionSupervisor,
+    child_spec: {MyNamedServer, my_arg: "Hello named server!"},
+    name: MyNamedServerPartitionSupervisor,
+    with_arguments: fn [opts], partition ->
+      [Keyword.put(opts, :partition, partition)]
+    end},
+  ]
+
+  {:ok, pid} = Supervisor.start_link(children, strategy: :one_for_one)
+  ```
+
+  See [`Examples`](#module-examples).
 
   ## Callbacks
 
@@ -67,7 +96,7 @@ defmodule NamedSupervisedServer do
   ...>assert Process.whereis(MyServer) == child
   ```
 
-  ### Additional options
+  ### With GenServer options
   ```elixir
   iex> defmodule TransientServer do
   ...>  use NamedSupervisedServer, restart: :transient, shutdown: 10_000
@@ -86,7 +115,7 @@ defmodule NamedSupervisedServer do
   ...>assert Process.whereis(TransientServer) == child
   ```
 
-  ### Naming the process with different name
+  ### Using a different name for the process
   ```elixir
   iex>defmodule NamedServer do
   ...>  use NamedSupervisedServer
@@ -107,13 +136,48 @@ defmodule NamedSupervisedServer do
   ...>end
   ...>
   ...>children = [
-  ...>  {NamedServer, [my_arg: "Hello named server!", name: :my_named_server]}
+  ...>  {NamedServer, my_arg: "Hello named server!", name: :my_named_server}
   ...>]
   ...># Starting a named supervised process
   ...>{:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
   ...>
   ...># Access the named process using its registered name
   ...>{:ok, "Hello named server!"} = NamedServer.get_my_arg(:my_named_server)
+  ```
+
+  ### With PartitionSupervisor
+  ```elixir
+  iex>defmodule MyNamedServer do
+  ...>  use NamedSupervisedServer
+  ...>
+  ...>  @impl GenServer
+  ...>  def init(arg) do
+  ...>    {:ok, arg}
+  ...>  end
+  ...>
+  ...>  @impl GenServer
+  ...>  def handle_call(:get_my_arg, _from, state) do
+  ...>    {:reply, {:ok, state[:my_arg]}, state}
+  ...>  end
+  ...>
+  ...>  def get_my_arg(pid) do
+  ...>    GenServer.call(pid, :get_my_arg)
+  ...>  end
+  ...>end
+  ...>
+  ...>children = [
+  ...>  {PartitionSupervisor,
+  ...>   child_spec: {MyNamedServer, my_arg: "Hello named server!", name: :my_named_server},
+  ...>   name: MyNamedServerPartitionSupervisor,
+  ...>   with_arguments: fn [opts], partition ->
+  ...>     [Keyword.put(opts, :partition, partition)]
+  ...>   end},
+  ...>]
+  ...># Starting a named supervised process
+  ...>{:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
+  ...>
+  ...># Access the named process using its registered name
+  ...>{:ok, "Hello named server!"} = MyNamedServer.get_my_arg(:my_named_server0)
   ```
 
   ### Custom start_link/1
@@ -191,11 +255,21 @@ defmodule NamedSupervisedServer do
       @doc false
       @impl NamedSupervisedServer
       def start_link(args) when is_list(args) do
+        {partition, args} = Keyword.pop(args, :partition)
         {name, init_args} = Keyword.pop(args, :name)
 
-        case name do
-          nil -> GenServer.start_link(__MODULE__, init_args, name: __MODULE__)
-          _ -> GenServer.start_link(__MODULE__, init_args, name: name)
+        case {name, partition} do
+          {nil, nil} ->
+            GenServer.start_link(__MODULE__, init_args, name: __MODULE__)
+
+          {nil, partition} ->
+            GenServer.start_link(__MODULE__, init_args, name: String.to_atom("#{__MODULE__}#{partition}"))
+
+          {name, nil} ->
+            GenServer.start_link(__MODULE__, init_args, name: name)
+
+          {name, partition} ->
+            GenServer.start_link(__MODULE__, init_args, name: String.to_atom("#{name}#{partition}"))
         end
       end
 
