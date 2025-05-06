@@ -162,7 +162,7 @@ defmodule NamedSupervisedServerTest do
       {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
 
       # Access the named process using its registered name
-      {:ok, [custom: "value"]} = TestGenServer.get_state(TestGenServer0)
+      {:ok, [partition: 0, custom: "value"]} = TestGenServer.get_state(TestGenServer0)
     end
 
     test "and named TestGenServer" do
@@ -179,7 +179,7 @@ defmodule NamedSupervisedServerTest do
       {:ok, _} = Supervisor.start_link(children, strategy: :one_for_one)
 
       # Access the named process using its registered name
-      {:ok, [custom: "value"]} = TestGenServer.get_state(:my_named_server0)
+      {:ok, [partition: 0, custom: "value"]} = TestGenServer.get_state(:my_named_server0)
     end
   end
 end

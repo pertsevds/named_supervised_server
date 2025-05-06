@@ -45,11 +45,6 @@ defmodule NamedSupervisedServer.MixProject do
   end
 
   defp docs do
-    [
-      main: "readme",
-      extras: [
-        "README.md"
-      ]
-    ]
+    []
   end
 end

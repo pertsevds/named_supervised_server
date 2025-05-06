@@ -11,20 +11,7 @@ The NamedSupervisedServer module simplifies the start-up of supervised GenServer
 
 NamedSupervisedServer is a GenServer + start\_link/1 behavior. By default, it registers name \_\_MODULE\_\_, but you can also supply a different name.
 
-Compatible with PartitionSupervisor.
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `named_supervised_server` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:named_supervised_server, "~> 0.1"}
-  ]
-end
-```
+Compatible with PartitionSupervisor. Partition number added at the end of process name, `:partition` argument passed down to process `init`.
 
 ## Documentation
 

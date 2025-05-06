@@ -25,5 +25,10 @@ named_supervised_server-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
-# No ASDF tool-versions
-.tool-versions
+# VS Code
+.vscode/*
+!.vscode/launch.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/

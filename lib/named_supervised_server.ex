@@ -6,10 +6,22 @@ defmodule NamedSupervisedServer do
   A behaviour module for starting supervised GenServer that is named as `__MODULE__` by default or you can supply different name.
 
   With the use of `NamedSupervisedServer`, you can avoid the need to add `c:start_link/1` function with `name: __MODULE__`
-  to your module every time you write a new one.
-  And if you need your own `c:start_link/1` function, you can override it.
+  to your module every time you write a new one. And if you need your own `c:start_link/1` function, you can override it.
 
-  Compatible with `PartitionSupervisor`.
+  Compatible with PartitionSupervisor. Partition number added at the end of process name, `:partition` argument passed down to process `init`.
+
+  ## Installation
+
+  If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+  by adding `named_supervised_server` to your list of dependencies in `mix.exs`:
+
+  ```elixir
+  def deps do
+    [
+      {:named_supervised_server, "~> 0.1"}
+    ]
+  end
+  ```
 
   ## Usage
 
@@ -160,8 +172,17 @@ defmodule NamedSupervisedServer do
   ...>    {:reply, {:ok, state[:my_arg]}, state}
   ...>  end
   ...>
+  ...>  @impl GenServer
+  ...>  def handle_call(:get_partition, _from, state) do
+  ...>    {:reply, {:ok, state[:partition]}, state}
+  ...>  end
+  ...>
   ...>  def get_my_arg(pid) do
   ...>    GenServer.call(pid, :get_my_arg)
+  ...>  end
+  ...>
+  ...>  def get_partition(pid) do
+  ...>    GenServer.call(pid, :get_partition)
   ...>  end
   ...>end
   ...>
@@ -178,6 +199,8 @@ defmodule NamedSupervisedServer do
   ...>
   ...># Access the named process using its registered name
   ...>{:ok, "Hello named server!"} = MyNamedServer.get_my_arg(:my_named_server0)
+  ...># Partition number of process
+  ...>{:ok, 0} = MyNamedServer.get_partition(:my_named_server0)
   ```
 
   ### Custom start_link/1
@@ -255,7 +278,7 @@ defmodule NamedSupervisedServer do
       @doc false
       @impl NamedSupervisedServer
       def start_link(args) when is_list(args) do
-        {partition, args} = Keyword.pop(args, :partition)
+        partition = Keyword.get(args, :partition)
         {name, init_args} = Keyword.pop(args, :name)
 
         case {name, partition} do
