@@ -7,7 +7,7 @@ defmodule NamedSupervisedServer.MixProject do
   def project do
     [
       app: :named_supervised_server,
-      version: "0.1.3",
+      version: "0.1.4",
       elixir: "~> 1.15",
       description: description(),
       package: package(),
