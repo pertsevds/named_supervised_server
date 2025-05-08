@@ -45,6 +45,8 @@ defmodule NamedSupervisedServer.MixProject do
   end
 
   defp docs do
-    []
+    [
+      main: "NamedSupervisedServer"
+    ]
   end
 end
