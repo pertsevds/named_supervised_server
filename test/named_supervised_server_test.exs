@@ -152,7 +152,7 @@ defmodule NamedSupervisedServerTest do
       children = [
         {PartitionSupervisor,
          child_spec: {TestGenServer, custom: "value"},
-         name: TestGenServerPartitionSupervisor,
+         name: TestGenServerPartitionSupervisor1,
          with_arguments: fn [opts], partition ->
            [Keyword.put(opts, :partition, partition)]
          end}
@@ -169,7 +169,7 @@ defmodule NamedSupervisedServerTest do
       children = [
         {PartitionSupervisor,
          child_spec: {TestGenServer, custom: "value", name: :my_named_server},
-         name: TestGenServerPartitionSupervisor,
+         name: TestGenServerPartitionSupervisor2,
          with_arguments: fn [opts], partition ->
            [Keyword.put(opts, :partition, partition)]
          end}
